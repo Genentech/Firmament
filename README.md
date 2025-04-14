@@ -14,12 +14,12 @@
 
 # firmament
 
-Provides method to perform gene signature search.
+Provides method to perform gene signature search on a collection of anndata objects.
 
 ## Installation
 
 ```shell
-pip install .
+pip install firmament
 ```
 
 ## Usage
@@ -39,5 +39,5 @@ print(results) # can also be converted into a Pandas DataFrame
 
 ## Note
 
-This project has been set up using PyScaffold 4.6. For details and usage
-information on PyScaffold see https://pyscaffold.org/.
+This project has been set up using [BiocSetup](https://github.com/biocpy/biocsetup)
+and [PyScaffold](https://pyscaffold.org/).
