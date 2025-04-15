@@ -13,29 +13,36 @@ __copyright__ = "jkanche"
 __license__ = "MIT"
 
 
-def calc_zscores(
+def compute_zscores(
     data: AnnData,
+    layer_name: str,
     gene_symbols: str = None,
-    celltype_annotation: str = "cellTypeOntologyID",
+    cell_type_labels: str = "cellTypeOntologyID",
     verbose: bool = False,
 ) -> pd.DataFrame:
     """Calculate z-scores on an ``AnnData`` Object.
 
-    Friendly wrapper around `calculate_z_score` method.
+    Wrapper around `calculate_z_score` method from the pegasus package.
 
     Args:
         data:
             Input ``AnnData`` object.
 
+        layer_name:
+            Name of the layer containing the count matrix.
+            Use None to use `X` slot of the AnnData object.
+
         gene_symbols:
             Column name from `var` that contains gene symbols.
-            Defaults to None.
+            Defaults to `None`, to use var's index.
 
         celltype_annotation:
-            Column name from `obs` that specifies cell type labels. Defaults to None.
+            Column name from `obs` that specifies cell type labels.
+            Defaults to `None` for no cell type labels.
 
     Returns:
-        A :py:class:`~pandas.DataFrame` of z-scores with each column as gene.
+        A :py:class:`~pandas.DataFrame` of z-scores for each cell across all genes.
+        This dataframe contains a column 'cell_types' that contains the cell type annotation labels.
     """
     logging.info("preprocessing data...")
 
@@ -44,14 +51,15 @@ def calc_zscores(
             logging.info(f"setting column {gene_symbols} as index for `data.var`")
         data.var = data.var.set_index(gene_symbols, drop=False)
     else:
-        if "symbol" in data.var.columns:
-            if verbose:
-                logging.info("dataset contains gene symbols; setting this as index to `data.var`")
-            data.var = data.var.set_index("symbol", drop=False)
+        logging.info("'var.index' is expected to contain gene symbols.")
 
     if verbose:
         logging.info("converting X to float32")
-    data.X = data.X.astype(np.float32)
+
+    if layer_name is None:
+        data.X = data.X.astype(np.float32)
+    else:
+        data.X = data.layers[layer_name].astype(np.float32)
 
     if verbose:
         logging.info("calculating z-scores using pegasus")
@@ -60,10 +68,10 @@ def calc_zscores(
     z_mat_df = pd.DataFrame(data=z_mat, columns=data.var.index.values)
     z_mat_df = z_mat_df.apply(pd.to_numeric, errors="coerce", downcast="float")
 
-    if celltype_annotation is not None and celltype_annotation in data.obs.columns:
+    if cell_type_labels is not None and cell_type_labels in data.obs.columns:
         if verbose:
-            logging.info(f"using {celltype_annotation} as celltype annotation")
-        z_mat_df["cell_types"] = data.obs[celltype_annotation].values
+            logging.info(f"using {cell_type_labels} as cell type annotation")
+        z_mat_df["cell_types"] = data.obs[cell_type_labels].values
     else:
         if verbose:
             logging.info("Dataset does not contains cell type labels, using 'NA' as default.")
@@ -103,7 +111,7 @@ def compute_hist(
     return res
 
 
-def calc_stats(
+def calculate_stats(
     zscores: Union[list, pd.Series],
     pvals: Union[list, pd.Series],
     num_hist_bins: int = 100,

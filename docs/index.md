@@ -1,18 +1,6 @@
-# firmament
+# Firmament
 
-Add a short description here!
-
-
-## Note
-
-> This is the main page of your project's [Sphinx] documentation. It is
-> formatted in [Markdown]. Add additional pages by creating md-files in
-> `docs` or rst-files (formatted in [reStructuredText]) and adding links to
-> them in the `Contents` section below.
->
-> Please check [Sphinx] and [MyST] for more information
-> about how to document your project and how to configure your preferences.
-
+Firmament is a Python package for performing high-throughput gene signature searches on large collections of single-cell RNA-seq datasets stored as H5Ad objects. It helps identify datasets containing sets of cells enriched with cells expressing a gene signature.
 
 ## Contents
 

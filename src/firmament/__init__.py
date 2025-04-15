@@ -16,3 +16,4 @@ finally:
     del version, PackageNotFoundError
 
 from .search import signature_search, batch_signature_search
+from .compute import compute_zscores
