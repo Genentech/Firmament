@@ -1,0 +1,29 @@
+firmament package
+=================
+
+Submodules
+----------
+
+firmament.compute module
+------------------------
+
+.. automodule:: firmament.compute
+   :members:
+   :show-inheritance:
+   :undoc-members:
+
+firmament.search module
+-----------------------
+
+.. automodule:: firmament.search
+   :members:
+   :show-inheritance:
+   :undoc-members:
+
+Module contents
+---------------
+
+.. automodule:: firmament
+   :members:
+   :show-inheritance:
+   :undoc-members:
