@@ -12,7 +12,8 @@ def test_sigsearch():
     results = signature_search(
         os.getcwd() + "/tests/data/test.h5ad",
         genes=["Tspan12", "Vipas39", "Cldn12"],
-        celltype_label_column_name="level1class",
+        layer_name=None,
+        cell_type_label_column_name="level1class",
         include_celltype_enrichment=True,
         verbose=True,
     )
