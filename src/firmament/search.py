@@ -5,7 +5,7 @@ import anndata
 import pandas
 from scipy.stats import norm
 
-from .compute import calc_stats, calc_zscores
+from .compute import calculate_stats, compute_zscores
 
 __author__ = "jkanche"
 __copyright__ = "jkanche"
@@ -15,8 +15,9 @@ __license__ = "MIT"
 def signature_search(
     adata_or_path: Union[str, anndata.AnnData],
     genes: list,
+    layer_name: str,
     gene_symbols_column_name: str = None,
-    celltype_label_column_name: str = None,
+    cell_type_label_column_name: str = None,
     num_hist_bins: int = 100,
     alpha: int = 0.1,
     include_celltype_enrichment: bool = False,
@@ -31,11 +32,18 @@ def signature_search(
         genes:
             Input genes or features of interest.
 
+        layer_name:
+            Name of the layer containing the count matrix.
+
+            Use None to use `X` slot of the AnnData object.
+
+            This is expected to be consistent across all the anndata objects.
+
         gene_symbols_column_name:
             Column in the ``var`` slot of ``AnnData`` containing gene symbols.
             Defaults to the index of the ``var`` slot.
 
-        celltype_label_column_name:
+        cell_type_label_column_name:
             Column in the ``obs`` slof of ``AnnData`` containing cell type labels.
             Defaults to the index of the ``obs`` slot.
 
@@ -67,10 +75,11 @@ def signature_search(
         if isinstance(adata_or_path, str):
             data = anndata.read_h5ad(adata_or_path)
 
-        z_mats = calc_zscores(
+        z_mats = compute_zscores(
             data,
             gene_symbols=gene_symbols_column_name,
-            celltype_annotation=celltype_label_column_name,
+            cell_type_labels=cell_type_label_column_name,
+            layer_name=layer_name,
             verbose=verbose,
         )
 
@@ -85,20 +94,18 @@ def signature_search(
         z_mat = z_mats[genes]
         zscores = z_mat.mean(axis=1)
         pvals = 1.0 - norm.cdf(zscores)
-        res = calc_stats(zscores, pvals, num_hist_bins=num_hist_bins, alpha=alpha)
+        res = calculate_stats(zscores, pvals, num_hist_bins=num_hist_bins, alpha=alpha)
         res["label"] = "overall"
         results.append(res)
 
         if include_celltype_enrichment:
-            celltypes = pandas.DataFrame(
-                {"cell_types": z_mats["cell_types"], "zscores": zscores, "pvals": pvals}
-            )
+            celltypes = pandas.DataFrame({"cell_types": z_mats["cell_types"], "zscores": zscores, "pvals": pvals})
 
             groups = celltypes.groupby("cell_types")
 
             if len(groups) > 1:
                 for cname, group in groups:
-                    res = calc_stats(
+                    res = calculate_stats(
                         group["zscores"].values,
                         group["pvals"].values,
                         num_hist_bins=num_hist_bins,
